@@ -1,0 +1,27 @@
+fastapi==0.139.0
+uvicorn[standard]==0.34.0
+gunicorn==23.0.0
+pydantic>=2.12,<3
+python-dotenv==1.0.1
+
+# Agent / Gemini
+google-adk==2.3.0
+google-genai==2.10.0
+
+# Market data & news
+yfinance==1.5.1
+requests>=2.32.3
+
+# Imaging
+Pillow==12.3.0
+matplotlib==3.10.0
+
+# Storage / integrations
+dropbox==12.0.2
+# Official LinkedIn Rest.li client - handles Rest.li entity-id decoding and
+# OAuth token exchange correctly. Note: LinkedIn marks this "beta" and it
+# hasn't had a release since 0.3.0 (2023), so we still do our own HTTP status
+# checking around it rather than trusting it to raise on errors.
+linkedin-api-client==0.3.0
+google-cloud-firestore==2.28.0
+google-cloud-secret-manager==2.29.0
