@@ -1,4 +1,4 @@
-# market-social-agent
+# stock-market-social-agent
 
 A daily US stock market recap agent: gathers market data + news with a
 [Google ADK](https://github.com/google/adk-python) / Gemini agent, generates
