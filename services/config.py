@@ -60,6 +60,9 @@ class Config:
     telegram_chat_id: str = field(default_factory=lambda: _env("TELEGRAM_CHAT_ID", ""))
 
     # --- Instagram ---
+    post_to_instagram: bool = field(
+        default_factory=lambda: _env("POST_TO_INSTAGRAM", "true").lower() == "true"
+    )
     instagram_business_account_id: str = field(
         default_factory=lambda: _env("INSTAGRAM_BUSINESS_ACCOUNT_ID", "")
     )

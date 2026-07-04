@@ -79,9 +79,16 @@ def _publish_container(creation_id: str) -> str:
 def publish_post(image_url: str, caption: str) -> dict:
     """Publish a single-image post to the configured Instagram Business account.
 
-    Returns `{"media_id": str}` on success. Raises `InstagramPublishError` on
-    any failure so callers can surface a clear error back via Telegram.
+    Returns `{"media_id": str}` on success, or `{"skipped": True, "reason": ...}`
+    if Instagram posting is disabled via `POST_TO_INSTAGRAM=false` (e.g. while
+    waiting on Meta App Review/API access - in that case `INSTAGRAM_ACCESS_TOKEN`
+    and `INSTAGRAM_BUSINESS_ACCOUNT_ID` never need to be configured at all).
+    Raises `InstagramPublishError` on any failure so callers can surface a
+    clear error back via Telegram.
     """
+
+    if not config.post_to_instagram:
+        return {"skipped": True, "reason": "Instagram posting disabled via POST_TO_INSTAGRAM"}
 
     creation_id = _create_container(image_url, caption)
     _wait_for_container_ready(creation_id)

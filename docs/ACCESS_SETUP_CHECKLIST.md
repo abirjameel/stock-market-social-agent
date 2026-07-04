@@ -35,6 +35,13 @@ against test/sandbox credentials until the production approvals land.
 
 ## 4. Meta (Instagram Graph API) - budget 2-4 weeks for App Review
 
+> Can't get Instagram credentials yet? Set `POST_TO_INSTAGRAM=false` in your
+> env and skip this section entirely for now - `instagram_service.publish_post()`
+> and the weekly token-refresh job both no-op cleanly without
+> `INSTAGRAM_ACCESS_TOKEN`/`INSTAGRAM_BUSINESS_ACCOUNT_ID` configured, and
+> LinkedIn publishing is unaffected. Flip it back to `true` once you have
+> credentials.
+
 - [ ] Create/use a Facebook Page for your brand.
 - [ ] Convert your Instagram account to a **Business** or **Creator** account (Instagram app -> Settings -> Account type) and link it to the Facebook Page.
 - [ ] Create a Meta app at https://developers.facebook.com/apps (type: Business).

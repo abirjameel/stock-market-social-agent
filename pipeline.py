@@ -115,7 +115,10 @@ def reject_draft(draft_id: str) -> dict:
 def _notify_publish_outcome(draft_id: str, results: dict, status: DraftStatus) -> None:
     lines = [f"Draft `{draft_id}` publish result: *{status.value}*"]
     if results.get("instagram"):
-        lines.append(f"Instagram: posted (media id `{results['instagram']['media_id']}`)")
+        if results["instagram"].get("skipped"):
+            lines.append(f"Instagram: skipped ({results['instagram'].get('reason', 'disabled')})")
+        else:
+            lines.append(f"Instagram: posted (media id `{results['instagram']['media_id']}`)")
     if results.get("linkedin"):
         li = results["linkedin"]
         if li.get("personal"):

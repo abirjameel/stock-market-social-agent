@@ -24,6 +24,9 @@ INSTAGRAM_REFRESH_URL = "https://graph.instagram.com/refresh_access_token"
 
 
 def refresh_instagram_token() -> dict:
+    if not config.post_to_instagram:
+        return {"skipped": True, "reason": "Instagram posting disabled via POST_TO_INSTAGRAM"}
+
     current_token = config.instagram_access_token()
     response = requests.get(
         INSTAGRAM_REFRESH_URL,
