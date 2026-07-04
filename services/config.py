@@ -89,8 +89,9 @@ class Config:
         default_factory=lambda: _env("POST_TO_LINKEDIN_ORGANIZATION", "true").lower() == "true"
     )
 
-    # --- Dropbox ---
-    dropbox_folder: str = field(default_factory=lambda: _env("DROPBOX_FOLDER", "/market-social-agent/posts"))
+    # --- Google Cloud Storage (post image archive) ---
+    gcs_bucket_name: str = field(default_factory=lambda: _env("GCS_BUCKET_NAME", ""))
+    gcs_folder: str = field(default_factory=lambda: _env("GCS_FOLDER", "posts"))
 
     # secrets (not cached on the dataclass instance - resolved on demand)
     def telegram_bot_token(self) -> str:
@@ -112,18 +113,6 @@ class Config:
 
     def finnhub_api_key(self) -> str | None:
         return get_secret("FINNHUB_API_KEY", required=False, default=None)
-
-    def dropbox_access_token(self) -> str:
-        return get_secret("DROPBOX_ACCESS_TOKEN")
-
-    def dropbox_refresh_token(self) -> str | None:
-        return get_secret("DROPBOX_REFRESH_TOKEN", required=False, default=None)
-
-    def dropbox_app_key(self) -> str | None:
-        return get_secret("DROPBOX_APP_KEY", required=False, default=None)
-
-    def dropbox_app_secret(self) -> str | None:
-        return get_secret("DROPBOX_APP_SECRET", required=False, default=None)
 
     def instagram_access_token(self) -> str:
         return get_secret("INSTAGRAM_ACCESS_TOKEN")

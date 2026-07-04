@@ -157,6 +157,11 @@ ENV/
 env.bak/
 venv.bak/
 
+# GCP service account keys (e.g. for local GOOGLE_APPLICATION_CREDENTIALS)
+*service-account*.json
+*-key.json
+firestore-key.json
+
 # Spyder project settings
 .spyderproject
 .spyproject

@@ -5,8 +5,8 @@ A daily US stock market recap agent: gathers market data + news with a
 LinkedIn and Instagram post copy plus a branded chart image, sends it to
 Telegram for a pre-posting approval, and - once approved - publishes to
 LinkedIn (personal profile + Company Page) and Instagram, archiving every
-generated image to Dropbox. Runs serverless on Google Cloud Run with Cloud
-Scheduler.
+generated image to Google Cloud Storage. Runs serverless on Google Cloud Run
+with Cloud Scheduler.
 
 ## How it works
 
@@ -15,7 +15,7 @@ flowchart LR
     Scheduler[CloudScheduler daily] --> Generate["/generate"]
     Generate --> ADK[ADK content agent + market/news tools]
     ADK --> Image[Chart + AI background compose]
-    Image --> Dropbox[Upload to Dropbox]
+    Image --> GCS[Upload to Cloud Storage]
     Image --> Draft[Save draft in Firestore]
     Draft --> Telegram[Send approval message]
     Telegram --> Webhook["/telegram/webhook"]
@@ -32,8 +32,8 @@ setup in [`docs/ACCESS_SETUP_CHECKLIST.md`](docs/ACCESS_SETUP_CHECKLIST.md).
 ```
 agent/            ADK content-writer agent + market data / news tools
 imaging/          Chart rendering, AI background generation, image compose
-services/         Config, secrets, Dropbox, Firestore, Telegram, Instagram,
-                   LinkedIn, token refresh
+services/         Config, secrets, Cloud Storage, Firestore, Telegram,
+                   Instagram, LinkedIn, token refresh
 pipeline.py       Orchestrates generate -> approve -> publish
 main.py           FastAPI app (Cloud Run entrypoint)
 deploy/           Cloud Run + Cloud Scheduler + Telegram webhook setup
@@ -49,7 +49,16 @@ pip install -r requirements.txt
 copy .env.example .env          # then fill in the values you already have
 ```
 
-Run the content agent alone (no Telegram/Dropbox/social credentials needed):
+Firestore and Cloud Storage always require real Google Cloud credentials
+(there's no API-key option), even if you're using `GEMINI_API_KEY` instead of
+Vertex AI for Gemini. Locally, either run `gcloud auth application-default login`,
+or create a service account (roles: Cloud Datastore User, Storage Object Admin),
+download its JSON key, and set `GOOGLE_APPLICATION_CREDENTIALS=path\to\key.json`
+in `.env`. Also make sure a Firestore database (Native mode) exists, and a
+Cloud Storage bucket (`GCS_BUCKET_NAME`) with public object read access - see
+[`docs/ACCESS_SETUP_CHECKLIST.md`](docs/ACCESS_SETUP_CHECKLIST.md).
+
+Run the content agent alone (no Telegram/Cloud Storage/social credentials needed):
 
 ```bash
 python -c "from agent.agent import generate_post_draft; print(generate_post_draft())"

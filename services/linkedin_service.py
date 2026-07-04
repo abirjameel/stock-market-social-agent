@@ -31,8 +31,8 @@ Prerequisites (see docs/ACCESS_SETUP_CHECKLIST.md):
   - `LINKEDIN_ACCESS_TOKEN` with the relevant scope(s) above.
 
 Images are uploaded via LinkedIn's own direct-binary-upload flow, so unlike
-Instagram we do NOT need a public image URL here - the Dropbox link is not
-involved in this integration at all.
+Instagram we do NOT need a public image URL here - the Cloud Storage link is
+not involved in this integration at all.
 """
 
 from __future__ import annotations

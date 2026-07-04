@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Builds and deploys the service to Cloud Run, wiring up secrets from Secret
-# Manager. Run from the repo root: `bash deploy/deploy.sh`.
+# Manager, provisioning the Cloud Storage bucket used to archive post images,
+# and granting the runtime service account the IAM roles it needs. Run from
+# the repo root: `bash deploy/deploy.sh`.
 #
 # Prerequisites:
 #   gcloud auth login
@@ -13,6 +15,7 @@ set -euo pipefail
 PROJECT_ID="${GOOGLE_CLOUD_PROJECT:?Set GOOGLE_CLOUD_PROJECT}"
 REGION="${GOOGLE_CLOUD_LOCATION:-us-central1}"
 SERVICE_NAME="${SERVICE_NAME:-market-social-agent}"
+GCS_BUCKET_NAME="${GCS_BUCKET_NAME:?Set GCS_BUCKET_NAME (must be globally unique)}"
 
 echo "Enabling required APIs..."
 gcloud services enable \
@@ -21,7 +24,37 @@ gcloud services enable \
   firestore.googleapis.com \
   secretmanager.googleapis.com \
   aiplatform.googleapis.com \
+  storage.googleapis.com \
   --project "$PROJECT_ID"
+
+echo "Ensuring Cloud Storage bucket gs://$GCS_BUCKET_NAME exists with public read access..."
+gcloud storage buckets describe "gs://$GCS_BUCKET_NAME" --project "$PROJECT_ID" >/dev/null 2>&1 || \
+  gcloud storage buckets create "gs://$GCS_BUCKET_NAME" \
+    --project "$PROJECT_ID" \
+    --location "$REGION" \
+    --uniform-bucket-level-access
+
+# Public read on every object in the bucket - required so Instagram's Graph
+# API can fetch `image_url` without any auth. Safe to re-run (idempotent).
+gcloud storage buckets add-iam-policy-binding "gs://$GCS_BUCKET_NAME" \
+  --member="allUsers" \
+  --role="roles/storage.objectViewer"
+
+PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+RUNTIME_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+
+echo "Granting the runtime service account ($RUNTIME_SA) the roles it needs..."
+gcloud storage buckets add-iam-policy-binding "gs://$GCS_BUCKET_NAME" \
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/storage.objectAdmin"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/datastore.user" \
+  --condition=None
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/aiplatform.user" \
+  --condition=None
 
 echo "Deploying $SERVICE_NAME to Cloud Run in $REGION..."
 # NOTE: --allow-unauthenticated is required because Telegram's webhook must
@@ -37,13 +70,10 @@ gcloud run deploy "$SERVICE_NAME" \
   --allow-unauthenticated \
   --memory 1Gi \
   --timeout 300 \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=$REGION,GOOGLE_GENAI_USE_VERTEXAI=true" \
+  --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=$REGION,GOOGLE_GENAI_USE_VERTEXAI=true,GCS_BUCKET_NAME=$GCS_BUCKET_NAME" \
   --set-secrets "TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest,\
 TELEGRAM_WEBHOOK_SECRET=TELEGRAM_WEBHOOK_SECRET:latest,\
 SCHEDULER_SECRET=SCHEDULER_SECRET:latest,\
-DROPBOX_APP_KEY=DROPBOX_APP_KEY:latest,\
-DROPBOX_APP_SECRET=DROPBOX_APP_SECRET:latest,\
-DROPBOX_REFRESH_TOKEN=DROPBOX_REFRESH_TOKEN:latest,\
 INSTAGRAM_ACCESS_TOKEN=INSTAGRAM_ACCESS_TOKEN:latest,\
 LINKEDIN_ACCESS_TOKEN=LINKEDIN_ACCESS_TOKEN:latest,\
 FINNHUB_API_KEY=FINNHUB_API_KEY:latest"

@@ -3,10 +3,9 @@ tokens: Instagram (60-day long-lived tokens) and LinkedIn (60-day access
 tokens, refreshable only if your app has been granted refresh-token rotation
 by LinkedIn - a separate, optional approval on top of basic API access).
 
-Dropbox is deliberately not handled here: `services.dropbox_store` uses the
-`dropbox` SDK's built-in refresh-token flow, which refreshes transparently on
-every call as long as `DROPBOX_REFRESH_TOKEN` is configured, so no cron is
-needed for it.
+Cloud Storage is deliberately not handled here: `services.gcs_store` uses
+Application Default Credentials (the Cloud Run service account in
+production), which never expire and need no refresh cron.
 
 Intended to run weekly via Cloud Scheduler (well within the 60-day expiry
 windows) - see deploy/scheduler_setup.sh.

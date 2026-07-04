@@ -47,8 +47,20 @@ def _history():
     return _get_client().collection(config.firestore_collection_history)
 
 
-def create_draft(payload: dict[str, Any]) -> str:
-    draft_id = str(uuid.uuid4())[:8]
+def new_draft_id() -> str:
+    return str(uuid.uuid4())[:8]
+
+
+def create_draft(payload: dict[str, Any], draft_id: str | None = None) -> str:
+    """Create a draft document, optionally under a caller-supplied id.
+
+    Callers that need the id before the draft exists (e.g. to name the
+    archived image after it so two same-day drafts never collide on the same
+    Cloud Storage object - see `pipeline.generate_daily_draft`) should call
+    `new_draft_id()` first and pass the result in here.
+    """
+
+    draft_id = draft_id or new_draft_id()
     record = {
         **payload,
         "status": DraftStatus.PENDING.value,
