@@ -16,6 +16,9 @@ PROJECT_ID="${GOOGLE_CLOUD_PROJECT:?Set GOOGLE_CLOUD_PROJECT}"
 REGION="${GOOGLE_CLOUD_LOCATION:-us-central1}"
 SERVICE_NAME="${SERVICE_NAME:-market-social-agent}"
 GCS_BUCKET_NAME="${GCS_BUCKET_NAME:?Set GCS_BUCKET_NAME (must be globally unique)}"
+# Only needed if you named your Firestore database something other than the
+# implicit "(default)" when you created it in the Cloud Console.
+FIRESTORE_DATABASE_ID="${FIRESTORE_DATABASE_ID:-(default)}"
 
 echo "Enabling required APIs..."
 gcloud services enable \
@@ -70,7 +73,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --allow-unauthenticated \
   --memory 1Gi \
   --timeout 300 \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=$REGION,GOOGLE_GENAI_USE_VERTEXAI=true,GCS_BUCKET_NAME=$GCS_BUCKET_NAME" \
+  --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=$REGION,GOOGLE_GENAI_USE_VERTEXAI=true,GCS_BUCKET_NAME=$GCS_BUCKET_NAME,FIRESTORE_DATABASE_ID=$FIRESTORE_DATABASE_ID" \
   --set-secrets "TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest,\
 TELEGRAM_WEBHOOK_SECRET=TELEGRAM_WEBHOOK_SECRET:latest,\
 SCHEDULER_SECRET=SCHEDULER_SECRET:latest,\

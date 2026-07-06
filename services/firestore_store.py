@@ -35,7 +35,10 @@ class DraftStatus(StrEnum):
 def _get_client() -> firestore.Client:
     global _client
     if _client is None:
-        _client = firestore.Client(project=config.gcp_project or None)
+        _client = firestore.Client(
+            project=config.gcp_project or None,
+            database=config.firestore_database_id,
+        )
     return _client
 
 

@@ -33,6 +33,13 @@ class Config:
     firestore_collection_history: str = field(
         default_factory=lambda: _env("FIRESTORE_COLLECTION_HISTORY", "post_history")
     )
+    # Firestore lets you create a database under a custom id instead of the
+    # implicit "(default)" one - if you did that (e.g. named it during setup
+    # in the Cloud Console), set this to match, or `firestore.Client()` will
+    # 404 looking for a database literally named "(default)" that doesn't exist.
+    firestore_database_id: str = field(
+        default_factory=lambda: _env("FIRESTORE_DATABASE_ID", "(default)")
+    )
 
     # --- Gemini / ADK ---
     content_model: str = field(default_factory=lambda: _env("CONTENT_MODEL", "gemini-2.5-flash"))
