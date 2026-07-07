@@ -17,6 +17,9 @@ from PIL import Image
 
 POSITIVE_COLOR = "#1DB954"
 NEGATIVE_COLOR = "#E03C31"
+# Dark, muted text/lines - the chart is composited onto a light "frosted
+# glass" panel (see imaging/compose.py), not a dark one.
+TEXT_COLOR = "#2A2E38"
 
 
 def render_index_chart(indices: list[dict], size_px: tuple[int, int] = (960, 480)) -> Image.Image:
@@ -33,7 +36,7 @@ def render_index_chart(indices: list[dict], size_px: tuple[int, int] = (960, 480
     ax.set_facecolor("none")
 
     bars = ax.barh(names, changes, color=colors, height=0.5)
-    ax.axvline(0, color="white", linewidth=1, alpha=0.6)
+    ax.axvline(0, color=TEXT_COLOR, linewidth=1, alpha=0.35)
 
     # Pad the x-axis well beyond the largest bar so value labels never collide
     # with the y-axis tick labels, even when every bar is small/near zero.
@@ -47,9 +50,9 @@ def render_index_chart(indices: list[dict], size_px: tuple[int, int] = (960, 480
         align = "left" if x >= 0 else "right"
         x_pos = x + offset if x >= 0 else x - offset
         ax.text(x_pos, bar.get_y() + bar.get_height() / 2, label, va="center", ha=align,
-                 color="white", fontsize=14, fontweight="bold")
+                 color=TEXT_COLOR, fontsize=14, fontweight="bold")
 
-    ax.tick_params(colors="white", labelsize=13)
+    ax.tick_params(colors=TEXT_COLOR, labelsize=13)
     for spine in ax.spines.values():
         spine.set_visible(False)
     ax.get_xaxis().set_visible(False)

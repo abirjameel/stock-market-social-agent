@@ -29,39 +29,35 @@ class PostDraftContent(BaseModel):
 
     linkedin_text: str = Field(
         description=(
-            "Professional LinkedIn post (roughly 80-150 words) summarizing today's US "
-            "stock market action: index moves, notable gainers/losers, and the likely "
-            "driver from the news headlines. No hashtags in the body; end with 2-4 "
-            "relevant hashtags on their own line."
+            "Professional LinkedIn post (roughly 50-90 words) summarizing today's US "
+            "stock market action: index moves, notable gainers/losers from the MAG10 "
+            "watchlist, and the likely driver from the news headlines. You may refer to "
+            "the tracked watchlist as \"the MAG10\" (our curated list of 10 large-cap "
+            "stocks). Be concise - every sentence should earn its place. No hashtags in "
+            "the body; end with 2-4 relevant hashtags on their own line."
         )
     )
     instagram_caption: str = Field(
         description=(
-            "Punchy Instagram caption (roughly 40-80 words) covering the same market "
-            "recap in a more casual tone, tasteful emoji use, ending with 5-8 hashtags."
+            "Punchy, concise Instagram caption (roughly 25-40 words) covering the same "
+            "market recap in a more casual tone, tasteful emoji use, ending with 5-8 hashtags."
         )
     )
     image_headline: str = Field(
-        description="Very short (max 6 words) headline stat for the post image, e.g. 'S&P 500 +1.2% Today'."
+        description="Very short (max 5 words, hard limit) headline stat for the post image, e.g. 'S&P 500 +1.2% Today'."
     )
     image_subtext: str = Field(
-        description="One short supporting line (max 10 words) for the post image, e.g. the standout mover."
-    )
-    image_style_prompt: str = Field(
-        description=(
-            "A short text-to-image prompt describing an abstract, professional financial-"
-            "themed background/accent graphic (no readable text, no charts) that matches "
-            "the day's market mood (e.g. upbeat green tones for a rally, muted red for a "
-            "selloff). Used to generate a stylistic background layer."
-        )
+        description="One short supporting line (max 8 words, hard limit) for the post image, e.g. the standout mover."
     )
 
 
 INSTRUCTION = """
-You are a financial social-media copywriter for a daily US stock market recap.
+You are a financial social-media copywriter for Wonder Trading Research (WTR),
+writing a daily US stock market recap. Our 10-stock watchlist is branded "the
+MAG10" - you may reference it by that name (e.g. "today's MAG10 movers").
 
 Steps you MUST follow on every run:
-1. Call `get_market_snapshot` to get real index and watchlist numbers.
+1. Call `get_market_snapshot` to get real index and watchlist (MAG10) numbers.
 2. Call `get_market_news` to get today's headlines for context (if headlines
    are empty, just describe price action without inventing a cause).
 3. Write the post copy using ONLY the real numbers returned by the tools -

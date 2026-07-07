@@ -14,7 +14,7 @@ with Cloud Scheduler.
 flowchart LR
     Scheduler[CloudScheduler daily] --> Generate["/generate"]
     Generate --> ADK[ADK content agent + market/news tools]
-    ADK --> Image[Chart + AI background compose]
+    ADK --> Image[Branded template compose: logo, chart, MAG10 grid, mascot]
     Image --> GCS[Upload to Cloud Storage]
     Image --> Draft[Save draft in Firestore]
     Draft --> Telegram[Send approval message]
@@ -31,7 +31,8 @@ setup in [`docs/ACCESS_SETUP_CHECKLIST.md`](docs/ACCESS_SETUP_CHECKLIST.md).
 
 ```
 agent/            ADK content-writer agent + market data / news tools
-imaging/          Chart rendering, AI background generation, image compose
+imaging/          Chart rendering, MAG10 movers grid, brand background, image compose
+assets/branding/  Fixed brand assets (WTR logo x2, bull mascot) - never regenerated
 services/         Config, secrets, Cloud Storage, Firestore, Telegram,
                    Instagram, LinkedIn, token refresh
 pipeline.py       Orchestrates generate -> approve -> publish
@@ -94,8 +95,16 @@ during local testing) and the webhook is registered per
 - Instagram Graph API and LinkedIn's Company Page posting both require
   platform approval that can take days to weeks - see the checklist doc.
   The code works against sandbox/test credentials in the meantime.
-- "Top movers" are computed from a configurable watchlist (`MARKET_WATCHLIST`
-  env var), not the full market, since a true full-market screener needs a
-  paid data feed.
-- Imagen was deprecated in August 2026; image generation uses
-  `gemini-2.5-flash-image` ("Nano Banana") instead.
+- "The MAG10" (top gainers/losers + full movement grid) is computed from a
+  configurable watchlist (`MARKET_WATCHLIST` env var, currently 10 tickers),
+  not the full market, since a true full-market screener needs a paid data
+  feed (Finnhub has no such endpoint; Alpha Vantage's `TOP_GAINERS_LOSERS` is
+  a free option if that's ever wanted instead).
+- The post image background/logo/mascot are all deterministic (Pillow +
+  fixed assets in `assets/branding/`) rather than AI-generated per day - an
+  earlier AI-generated-background approach kept hallucinating readable text,
+  fake numbers, and dashboard-style UI elements despite prompting against it.
+  Only the LinkedIn/Instagram/headline copy is Gemini-generated. If the
+  mascot ever needs regenerating, it was produced once with
+  `gemini-3.1-flash-image` and hand-cut to a transparent PNG - there's no
+  script for this checked in since it's a one-off, ad-hoc task.

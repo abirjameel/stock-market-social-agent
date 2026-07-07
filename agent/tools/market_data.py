@@ -39,13 +39,14 @@ def _fetch_change(symbol: str) -> TickerMove | None:
 
 def get_market_snapshot() -> str:
     """Fetch the latest daily close vs. previous close for the major US indices
-    (S&P 500, Dow Jones, Nasdaq Composite) and a curated large-cap watchlist,
-    and return the top 3 gainers and top 3 losers from the watchlist.
+    (S&P 500, Dow Jones, Nasdaq Composite) and the MAG10 watchlist, and return
+    the top 3 gainers, top 3 losers, and every MAG10 ticker's move.
 
     Returns a JSON string with keys: `indices`, `top_gainers`, `top_losers`,
-    each numeric field rounded to 2 decimal places. Use this tool first to
-    ground any commentary about "what happened in the market today" in real
-    numbers instead of guessing.
+    `watchlist` (all MAG10 tickers, sorted best-to-worst by change_pct), each
+    numeric field rounded to 2 decimal places. Use this tool first to ground
+    any commentary about "what happened in the market today" in real numbers
+    instead of guessing.
     """
 
     indices = []
@@ -88,5 +89,6 @@ def get_market_snapshot() -> str:
         "indices": indices,
         "top_gainers": [_serialize(m) for m in top_gainers],
         "top_losers": [_serialize(m) for m in top_losers],
+        "watchlist": [_serialize(m) for m in watchlist_moves],
     }
     return json.dumps(payload)

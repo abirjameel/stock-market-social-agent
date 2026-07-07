@@ -29,9 +29,8 @@ logger = logging.getLogger(__name__)
 async def generate_daily_draft() -> dict:
     content = await generate_post_draft_async()
     snapshot = json.loads(get_market_snapshot())
-    indices = snapshot.get("indices", [])
 
-    image_path = compose_post_image(indices, content)
+    image_path = compose_post_image(snapshot, content)
 
     today = dt.date.today().isoformat()
     # Generated up front (rather than letting create_draft mint one) so the
