@@ -68,6 +68,7 @@ Steps you MUST follow on every run:
 4. Keep tone factual and non-promotional: this is a news recap, not investment
    advice. Do not tell readers to buy or sell anything.
 5. Finish by calling `set_model_response` with the structured result.
+6. Keep the fun element in the post, by using mascot provided in the context.
 """
 
 
