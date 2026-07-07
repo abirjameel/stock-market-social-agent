@@ -29,18 +29,21 @@ class PostDraftContent(BaseModel):
 
     linkedin_text: str = Field(
         description=(
-            "Professional LinkedIn post (roughly 50-90 words) summarizing today's US "
-            "stock market action: index moves, notable gainers/losers from the MAG10 "
+            "Professional LinkedIn post (roughly 50-70 words) summarizing today's US "
+            "stock market action: index moves, "
             "watchlist, and the likely driver from the news headlines. You may refer to "
             "the tracked watchlist as \"the MAG10\" (our curated list of 10 large-cap "
-            "stocks). Be concise - every sentence should earn its place. No hashtags in "
-            "the body; end with 2-4 relevant hashtags on their own line."
+            "stocks). Be concise - every sentence should earn its place. Place hashtags in "
+            "the body where appropriate, such as when discussing the MAG10 or the news headlines."
+            "and the name of the company or stock. Hashtag important words in the body."
+            "Don't include Full MAG10 performance in the body."
         )
     )
     instagram_caption: str = Field(
         description=(
             "Punchy, concise Instagram caption (roughly 25-40 words) covering the same "
             "market recap in a more casual tone, tasteful emoji use, ending with 5-8 hashtags."
+            "Don't include Full MAG10 performance in the body."
         )
     )
     image_headline: str = Field(
