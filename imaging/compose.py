@@ -165,7 +165,7 @@ def compose_post_image(snapshot: dict, content: PostDraftContent) -> Path:
     canvas.alpha_composite(movers_img, (MARGIN, cursor_y + heading_h))
     mag10_panel_bottom = cursor_y + mag10_panel_h
 
-    # ---- Footer branding bar -------------------------------------------------
+    # ---- Footer branding bar: pinned to canvas bottom ----------------------
     footer_h = 96
     footer_y = CANVAS_SIZE[1] - footer_h
     canvas.alpha_composite(_panel(CANVAS_SIZE[0], footer_h), (0, footer_y))
@@ -179,16 +179,22 @@ def compose_post_image(snapshot: dict, content: PostDraftContent) -> Path:
     draw.text((brand_x, footer_y + 22), "Wonder Trading Research (WTR)", font=brand_font, fill=TEXT_DARK)
     draw.text((brand_x, footer_y + 54), "Learn. Connect. Grow.", font=tagline_font, fill=TEXT_MUTED)
 
-    # ---- Mascot: confined to the gap between the MAG10 panel and the footer
-    # so it can never overlap/obscure real data, however long the day's copy is.
-    mascot_zone_top = mag10_panel_bottom + 12
-    mascot_zone_bottom = footer_y + 36  # small deliberate overlap into the footer only
-    mascot_target_h = max(60, min(MASCOT_HEIGHT, mascot_zone_bottom - mascot_zone_top))
-    mascot_w = int(mascot_target_h * (mascot.width / mascot.height))
-    mascot_resized = mascot.resize((mascot_w, mascot_target_h))
-    mascot_x = CANVAS_SIZE[0] - mascot_w - 16
-    mascot_y = mascot_zone_bottom - mascot_target_h
-    canvas.alpha_composite(mascot_resized, (mascot_x, mascot_y))
+    # ---- Gap panel: fills the space between the MAG10 panel and the footer
+    # so the bare watercolor background is never visible.
+    gap_top = mag10_panel_bottom
+    gap_h = footer_y - gap_top
+    if gap_h > 0:
+        canvas.alpha_composite(_panel(CANVAS_SIZE[0], gap_h), (0, gap_top))
+
+    # ---- Mascot: occupies the right half of the gap + footer area.
+    # Top is anchored at mag10_panel_bottom so it never covers any grid data.
+    # Height fills exactly from there to the canvas bottom.
+    mascot_available_h = CANVAS_SIZE[1] - mag10_panel_bottom
+    mascot_display_h = max(80, mascot_available_h)
+    mascot_w = int(mascot_display_h * (mascot.width / mascot.height))
+    mascot_resized = mascot.resize((mascot_w, mascot_display_h))
+    mascot_x = CANVAS_SIZE[0] - mascot_w - 12
+    canvas.alpha_composite(mascot_resized, (mascot_x, mag10_panel_bottom))
 
     final_image = canvas.convert("RGB")
     output_path = Path(tempfile.gettempdir()) / f"market_post_{datetime.date.today().isoformat()}.jpg"
