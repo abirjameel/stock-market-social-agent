@@ -30,7 +30,7 @@ class PostDraftContent(BaseModel):
 
     linkedin_text: str = Field(
         description=(
-            "Professional LinkedIn post (roughly 50-70 words) summarizing today's US "
+            "Professional LinkedIn post (roughly 25-40 words) summarizing today's US "
             "stock market action: index moves, "
             "watchlist, and the likely driver from the news headlines. You may refer to "
             "the tracked watchlist as \"the MAG10\" (our curated list of 10 large-cap "
