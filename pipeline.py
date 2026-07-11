@@ -1,8 +1,9 @@
 """Orchestrates the two halves of the daily pipeline:
 
-  1. `generate_daily_draft` - runs the content agent, renders the image,
-     archives it to Cloud Storage, saves a draft in Firestore, and sends it to
-     Telegram for approval. Triggered by Cloud Scheduler via `POST /generate`.
+  1. `generate_daily_draft` - runs the content agent (which generates the post
+     image via Gemini image generation), archives it to Cloud Storage, saves a
+     draft in Firestore, and sends it to Telegram for approval. Triggered by
+     Cloud Scheduler via `POST /generate`.
   2. `approve_and_publish_draft` / `reject_draft` - triggered by the Telegram
      webhook once a human taps a button. Publishes to Instagram + LinkedIn
      and records the outcome.
@@ -16,10 +17,10 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+from pathlib import Path
 
 from agent.agent import generate_post_draft_async
 from agent.tools.market_data import get_market_snapshot
-from imaging.compose import compose_post_image
 from services import firestore_store, gcs_store, instagram_service, linkedin_service, telegram_service
 from services.firestore_store import DraftStatus
 
@@ -28,9 +29,11 @@ logger = logging.getLogger(__name__)
 
 async def generate_daily_draft() -> dict:
     content = await generate_post_draft_async()
+    # `content.image_path` is set by the agent via the generate_post_image tool.
+    # We still fetch the snapshot here solely to archive the raw numbers in Firestore.
     snapshot = json.loads(get_market_snapshot())
 
-    image_path = compose_post_image(snapshot, content)
+    image_path = Path(content.image_path)
 
     today = dt.date.today().isoformat()
     # Generated up front (rather than letting create_draft mint one) so the
