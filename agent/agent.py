@@ -17,6 +17,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel, Field
 
+from agent.tools.image_gen import generate_post_image
 from agent.tools.market_data import get_market_snapshot
 from agent.tools.news import get_market_news
 from services.config import config
@@ -52,6 +53,12 @@ class PostDraftContent(BaseModel):
     image_subtext: str = Field(
         description="One short supporting line (max 8 words, hard limit) for the post image, e.g. the standout mover."
     )
+    image_path: str = Field(
+        description=(
+            "Absolute path to the generated post image JPEG file, exactly as returned by "
+            "`generate_post_image`. Do not modify this value."
+        )
+    )
 
 
 INSTRUCTION = """
@@ -67,8 +74,14 @@ Steps you MUST follow on every run:
    never invent index levels or percentages.
 4. Keep tone factual and non-promotional: this is a news recap, not investment
    advice. Do not tell readers to buy or sell anything.
-5. Finish by calling `set_model_response` with the structured result.
-6. Keep the fun element in the post, by using mascot provided in the context.
+5. Decide on `image_headline` (max 5 words) and `image_subtext` (max 8 words)
+   from the real data.
+6. Determine the market `mood`: "bullish" if S&P 500 closed up, "bearish" if
+   it closed down.
+7. Call `generate_post_image` with the headline, subtext, mood, and a two- or
+   three-sentence `market_summary` of the key index moves and standout MAG10
+   mover (use real numbers). Store the returned path exactly as `image_path`.
+8. Return the final structured result including `image_path` verbatim.
 """
 
 
@@ -77,7 +90,7 @@ def build_content_agent() -> Agent:
         name="market_content_writer",
         model=config.content_model,
         instruction=INSTRUCTION,
-        tools=[get_market_snapshot, get_market_news],
+        tools=[get_market_snapshot, get_market_news, generate_post_image],
         output_schema=PostDraftContent,
     )
 

@@ -43,7 +43,7 @@ class Config:
 
     # --- Gemini / ADK ---
     content_model: str = field(default_factory=lambda: _env("CONTENT_MODEL", "gemini-2.5-flash"))
-    image_model: str = field(default_factory=lambda: _env("IMAGE_MODEL", "gemini-2.5-flash-image"))
+    image_model: str = field(default_factory=lambda: _env("IMAGE_MODEL", "gemini-3.1-flash-image"))
 
     # --- Market data ---
     market_indices: tuple[str, ...] = (
